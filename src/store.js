@@ -4,6 +4,8 @@
 class Store {
   constructor(initState = {}) {
     this.state = initState;
+    this.usedCodes = new Set(this.state.list.map(item => item.code)); // Create a set of used codes
+    this.lastUsedCode = Math.max(...this.state.list.map(item => item.code));;
     this.listeners = []; // Слушатели изменений состояния
   }
 
@@ -38,14 +40,22 @@ class Store {
     for (const listener of this.listeners) listener();
   }
 
+
+
   /**
    * Добавление новой записи
    */
   addItem() {
+    let newCode;
+    do {
+      newCode = this.lastUsedCode + 1;
+    } while (this.usedCodes.has(newCode)); // Find a unique code
+    this.usedCodes.add(newCode); // Add the new code to the set of used codes
     this.setState({
       ...this.state,
-      list: [...this.state.list, { code: this.state.list.length + 1, title: 'Новая запись' }],
+      list: [...this.state.list, { code: newCode, title: 'Новая запись' }],
     });
+    this.lastUsedCode = newCode; // Update lastUsedCode
   }
 
   /**
@@ -57,6 +67,13 @@ class Store {
       ...this.state,
       list: this.state.list.filter(item => item.code !== code),
     });
+    this.usedCodes.delete(code); // Remove the code from the set of used codes
+    if (code === this.lastUsedCode - 1) {
+      let newLastUsedCode = Math.max(...this.state.list.map(item => item.code));
+      if (newLastUsedCode < this.lastUsedCode) {
+        this.lastUsedCode = newLastUsedCode;
+      }
+    }
   }
 
   /**
@@ -69,6 +86,13 @@ class Store {
       list: this.state.list.map(item => {
         if (item.code === code) {
           item.selected = !item.selected;
+          if (item.selected) {
+            item.selectionCount = (item.selectionCount || 0) + 1; // Увеличиваем счетчик
+          }
+          item.displaySelectionCount = item.selected; // Show selection count only when selected
+        } else {
+          item.selected = false;
+          item.displaySelectionCount = false; // Hide selection count when not selected
         }
         return item;
       }),
@@ -77,3 +101,4 @@ class Store {
 }
 
 export default Store;
+
