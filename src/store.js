@@ -4,7 +4,7 @@
 class Store {
   constructor(initState = {}) {
     this.state = initState;
-    this.usedCodes = new Set(this.state.list.map(item => item.code)); // Create a set of used codes
+    this.usedCodes = new Set(this.state.list.map(item => item.code));
     this.lastUsedCode = Math.max(...this.state.list.map(item => item.code));;
     this.listeners = []; // Слушатели изменений состояния
   }
@@ -49,13 +49,13 @@ class Store {
     let newCode;
     do {
       newCode = this.lastUsedCode + 1;
-    } while (this.usedCodes.has(newCode)); // Find a unique code
-    this.usedCodes.add(newCode); // Add the new code to the set of used codes
+    } while (this.usedCodes.has(newCode));
+    this.usedCodes.add(newCode);
     this.setState({
       ...this.state,
       list: [...this.state.list, { code: newCode, title: 'Новая запись' }],
     });
-    this.lastUsedCode = newCode; // Update lastUsedCode
+    this.lastUsedCode = newCode;
   }
 
   /**
@@ -67,7 +67,7 @@ class Store {
       ...this.state,
       list: this.state.list.filter(item => item.code !== code),
     });
-    this.usedCodes.delete(code); // Remove the code from the set of used codes
+    this.usedCodes.delete(code);
     if (code === this.lastUsedCode - 1) {
       let newLastUsedCode = Math.max(...this.state.list.map(item => item.code));
       if (newLastUsedCode < this.lastUsedCode) {
@@ -89,10 +89,10 @@ class Store {
           if (item.selected) {
             item.selectionCount = (item.selectionCount || 0) + 1; // Увеличиваем счетчик
           }
-          item.displaySelectionCount = item.selected; // Show selection count only when selected
+          item.displaySelectionCount = item.selected;
         } else {
           item.selected = false;
-          item.displaySelectionCount = false; // Hide selection count when not selected
+          item.displaySelectionCount = false;
         }
         return item;
       }),
