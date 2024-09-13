@@ -5,7 +5,8 @@ class Store {
   constructor(initState = {}) {
     this.state = initState;
     this.usedCodes = new Set(this.state.list.map(item => item.code));
-    this.lastUsedCode = Math.max(...this.state.list.map(item => item.code));;
+    // this.lastUsedCode = Math.max(...this.state.list.map(item => item.code));
+    this.nextCode = Math.max(...this.state.list.map(item => item.code)) + 1;
     this.listeners = []; // Слушатели изменений состояния
   }
 
@@ -46,16 +47,13 @@ class Store {
    * Добавление новой записи
    */
   addItem() {
-    let newCode;
-    do {
-      newCode = this.lastUsedCode + 1;
-    } while (this.usedCodes.has(newCode));
+    const newCode = this.nextCode;
     this.usedCodes.add(newCode);
     this.setState({
       ...this.state,
       list: [...this.state.list, { code: newCode, title: 'Новая запись' }],
     });
-    this.lastUsedCode = newCode;
+    this.nextCode++;
   }
 
   /**
@@ -68,12 +66,12 @@ class Store {
       list: this.state.list.filter(item => item.code !== code),
     });
     this.usedCodes.delete(code);
-    if (code === this.lastUsedCode - 1) {
-      let newLastUsedCode = Math.max(...this.state.list.map(item => item.code));
-      if (newLastUsedCode < this.lastUsedCode) {
-        this.lastUsedCode = newLastUsedCode;
-      }
-    }
+    // if (code === this.lastUsedCode - 1) {
+    //   let newLastUsedCode = Math.max(...this.state.list.map(item => item.code));
+    //   if (newLastUsedCode < this.lastUsedCode) {
+    //     this.lastUsedCode = newLastUsedCode;
+    //   }
+    // }
   }
 
   /**
@@ -89,11 +87,8 @@ class Store {
           if (item.selected) {
             item.selectionCount = (item.selectionCount || 0) + 1; // Увеличиваем счетчик
           }
-          item.displaySelectionCount = item.selected;
-        } else {
-          item.selected = false;
-          item.displaySelectionCount = false;
         }
+        item.displaySelectionCount = item.selectionCount > 0; // Показываем счетчик даже для не выделенных пунктов
         return item;
       }),
     });
