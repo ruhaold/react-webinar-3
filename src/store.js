@@ -83,10 +83,15 @@ class Store {
       ...this.state,
       list: this.state.list.map(item => {
         if (item.code === code) {
-          item.selected = !item.selected;
           if (item.selected) {
+            // Если запись уже была выделена, сбрасываем выделение
+            item.selected = false;
+          } else {
+            item.selected = true;
             item.selectionCount = (item.selectionCount || 0) + 1; // Увеличиваем счетчик
           }
+        } else {
+          item.selected = false; // Сбрасываем выделение для других пунктов
         }
         item.displaySelectionCount = item.selectionCount > 0; // Показываем счетчик даже для не выделенных пунктов
         return item;
