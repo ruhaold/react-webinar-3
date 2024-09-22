@@ -89,12 +89,16 @@ body {
 
 .Modal-header {
   background: #dfdfdf;
-  padding: 40px;
+  padding: 10px;
   display: flex;
   align-items: center;
-  width: 600px;
+  width: 660px;
   justify-content: space-between;
   border-radius: 10px 10px 0 0;
+}
+
+.Modal-header h2 {
+  margin: 5px;
 }
 
 .Modal-header button {
@@ -107,8 +111,14 @@ body {
 .Modal-body {
   background: #fff;
   padding: 40px;
-  width: 600px;
+  padding-right: 0;
+  padding-left: 0;
+  width: 680px;
   overflow-y: auto;
+}
+
+.Modal-body ul {
+  padding-left: 0;
 }
 
 .Modal-footer {
@@ -117,4 +127,5 @@ body {
   width: 600px;
   text-align: right;
   border-radius: 0 0 10px 10px;
+  font-weight: bolder;
 }

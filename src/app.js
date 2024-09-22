@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { commafy, getWordForQuantity } from './utils.js';
 import './styles.css';
 
@@ -8,11 +8,19 @@ import './styles.css';
  * @returns {React.ReactElement}
  */
 function App({ store = {} }) {
-  const list = store.getState().list;
-  const cartTotal = store.getCartTotal();
-  const cartSum = store.getCartSum();
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const [isCartOpen, setIsCartOpen] = React.useState(false);
+  const handleRemoveFromCart = (code) => {
+    store.removeFromCart(code);
+    setIsCartOpen(true);
+  };
+
+  useEffect(() => {
+    // Обновляем состояние при изменении store
+    store.listeners.push(() => {
+      setIsCartOpen(isCartOpen);
+    });
+  }, [store]);
 
   return (
     <div className="App">
@@ -25,10 +33,10 @@ function App({ store = {} }) {
           <div className="List-item">
             <div className="Item">
               <p> корзине:</p>
-              <p className="Card-info"> {cartTotal === 0 ? 'пусто' : cartTotal}</p>
-              {cartTotal != 0 && (
+              <p className="Card-info"> {store.getState().cartTotal === 0 ? 'пусто' : store.getState().cartTotal}</p>
+              {store.getState().cartTotal != 0 && (
                 <p className="Card-info">
-                  {getWordForQuantity(cartTotal)} / {commafy(cartSum)}₽
+                  {getWordForQuantity(store.getState().cartTotal)} / {commafy(store.getState().cartSum)}₽
                 </p>
               )}
               <div className="Item-actions">
@@ -36,7 +44,7 @@ function App({ store = {} }) {
               </div>
             </div>
           </div>
-          {list.map(item => (
+          {store.getState().list.map(item => (
             <div key={item.code} className="List-item">
               <div className="Item">
                 <div className="Item-code">{item.code}</div>
@@ -70,7 +78,7 @@ function App({ store = {} }) {
                       <div className="Item-cost">{commafy(cartItem.cost)} ₽</div>
                       <div className="Item-cost">{cartItem.quantity} шт</div>
                       <div className="Item-actions">
-                        <button onClick={() => store.removeFromCart(cartItem.code)}>Удалить</button>
+                        <button onClick={() => handleRemoveFromCart(cartItem.code)}>Удалить</button>
                       </div>
                     </div>
                   </div>
@@ -79,7 +87,7 @@ function App({ store = {} }) {
             )}
           </div>
           <div className="Modal-footer">
-            <div>Сумма: {commafy(cartSum)} ₽</div>
+            <div>Сумма: {commafy(store.getState().cartSum)} ₽</div>
           </div>
         </div>
       )}

@@ -5,6 +5,8 @@ class Store {
   constructor(initState = {}) {
     this.state = {
       cart: [], // Состояние корзины
+      cartTotal: 0, // Общее количество уникальных товаров в корзине
+      cartSum: 0, // Общая сумма товаров
       ...initState,
     };
     this.listeners = []; // Слушатели изменений состояния
@@ -46,15 +48,25 @@ class Store {
    * @param item {Object} Товар, который нужно добавить в корзину
    */
   addToCart(item) {
+    if (!item.code || !item.cost) {
+      throw new Error('Товар должен иметь свойства code и cost');
+    }
+
     const cartItem = this.state.cart.find(cartItem => cartItem.code === item.code);
+    const newCart = [...this.state.cart]; // Создаем новый массив
+
     if (cartItem) {
       // Если товар уже есть в корзине, увеличиваем его количество
-      cartItem.quantity += 1;
+      const index = newCart.indexOf(cartItem);
+      newCart[index] = { ...cartItem, quantity: cartItem.quantity + 1 };
+      this.state.cartSum = Number(this.state.cartSum) + Number(item.cost); // Преобразуем к числам перед сложением
     } else {
       // Если товара нет в корзине, добавляем его с количеством 1
-      this.state.cart.push({ ...item, quantity: 1 });
+      newCart.push({ ...item, quantity: 1 });
+      this.state.cartSum = Number(this.state.cartSum) + Number(item.cost); // Преобразуем к числам перед сложением
     }
-    this.setState({ ...this.state });
+    this.state.cartTotal = newCart.length; // Обновляем общее количество товаров в корзине
+    this.setState({ ...this.state, cart: newCart }); // Обновляем состояние
   }
 
   /**
@@ -62,10 +74,15 @@ class Store {
    * @param code {Number} Код товара, который нужно удалить из корзины
    */
   removeFromCart(code) {
-    this.setState({
-      ...this.state,
-      cart: this.state.cart.filter(cartItem => cartItem.code !== code),
-    });
+    const itemToRemove = this.state.cart.find(cartItem => cartItem.code === code);
+    if (!itemToRemove) {
+      throw new Error(`Товар с кодом ${code} не найден в корзине`);
+    }
+
+    const newCart = this.state.cart.filter(cartItem => cartItem.code !== code);
+    this.state.cartSum = Number(this.state.cartSum) - Number(itemToRemove.cost) * Number(itemToRemove.quantity); // Преобразуем к числам перед вычитанием
+    this.state.cartTotal = newCart.length; // Обновляем общее количество товаров в корзине
+    this.setState({ ...this.state, cart: newCart }); // Обновляем состояние
   }
 
   /**
